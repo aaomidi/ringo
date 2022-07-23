@@ -58,14 +58,13 @@ def registerHandlers(app: Application):
 
 if __name__ == "__main__":
     from os import path
-    from asyncio import set_event_loop_policy
-    from uvloop import EventLoopPolicy
+    import uvloop
 
     TOKEN = environ["TOKEN"]
     ENDPOINT = environ["ENDPOINT"]
     PORT = int(environ.get("PORT", "8443"))
 
-    set_event_loop_policy(EventLoopPolicy())
+    uvloop.install()
     app = Application.builder().token(TOKEN).build()
     registerHandlers(app)
 
@@ -75,13 +74,13 @@ if __name__ == "__main__":
 
     elif path.exists("./cert.pem") and path.exists("./private.key"):
         print(
-            f"Starting webhook on port {PORT} with a self-signed certificate. Requests to the bot will be decoded by the application."
+            f"Starting webserver + webhook on port {PORT} with a self-signed certificate. Requests to the bot will be decoded by the application."
         )
         app.run_webhook(
             listen="0.0.0.0",
             port=PORT,
-            url_path=TOKEN,
-            webhook_url=f"{ENDPOINT}/{TOKEN}",
+            url_path=f"bot{TOKEN}",
+            webhook_url=f"{ENDPOINT}/bot{TOKEN}",
             key="private.key",
             cert="cert.pem",
         )
@@ -92,6 +91,6 @@ if __name__ == "__main__":
         app.run_webhook(
             listen="0.0.0.0",
             port=PORT,
-            url_path=TOKEN,
-            webhook_url=f"{ENDPOINT}/{TOKEN}",
+            url_path=f"bot{TOKEN}",
+            webhook_url=f"{ENDPOINT}/bot{TOKEN}",
         )
